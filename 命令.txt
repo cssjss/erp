@@ -1,0 +1,34 @@
+宝塔部署速查
+
+域名：testclf01.xyz / www.testclf01.xyz
+推荐站点目录：/www/wwwroot/simple-erp/frontend/dist
+后端目录：/www/wwwroot/simple-erp/backend
+后端端口：3001
+API 反向代理：/api -> http://127.0.0.1:3001
+
+后端 .env 模板：
+PORT=3001
+MYSQL_HOST=127.0.0.1
+MYSQL_PORT=3306
+MYSQL_USER=simple_erp_user
+MYSQL_PASSWORD=请填写宝塔数据库密码
+MYSQL_DATABASE=simple_erp
+CORS_ORIGIN=https://www.testclf01.xyz,https://testclf01.xyz
+AUTH_SECRET=请填写一串足够长的随机密钥
+DEFAULT_ADMIN_USERNAME=admin
+DEFAULT_ADMIN_EMAIL=admin@example.com
+DEFAULT_ADMIN_PASSWORD=Admin@123456
+
+前端 .env：
+VITE_API_BASE_URL=/api
+
+服务器构建命令：
+cd /www/wwwroot/simple-erp/backend
+npm install --omit=dev
+pm2 start ecosystem.config.cjs
+pm2 save
+
+cd /www/wwwroot/simple-erp/frontend
+npm install --include=optional
+npm run build
+

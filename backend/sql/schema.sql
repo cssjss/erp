@@ -1,0 +1,82 @@
+CREATE TABLE IF NOT EXISTS categories (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  name VARCHAR(120) NOT NULL UNIQUE,
+  sort_order INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS users (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  username VARCHAR(80) NOT NULL UNIQUE,
+  email VARCHAR(160) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  password_salt VARCHAR(64) NOT NULL,
+  avatar_data_url LONGTEXT NULL,
+  note VARCHAR(255) NOT NULL DEFAULT '',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS category_specs (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  category_id INT NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  sort_order INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_category_specs_category
+    FOREIGN KEY (category_id) REFERENCES categories(id)
+    ON DELETE CASCADE,
+  UNIQUE KEY uniq_category_spec_name (category_id, name)
+);
+
+CREATE TABLE IF NOT EXISTS products (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  category_id INT NOT NULL,
+  price DECIMAL(10, 2) NOT NULL DEFAULT 0,
+  quantity INT NOT NULL DEFAULT 0,
+  status ENUM('待寄回', '已寄回', '已到货', '已发出', '已完成') NOT NULL DEFAULT '待寄回',
+  note VARCHAR(255) NOT NULL DEFAULT '',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_products_category
+    FOREIGN KEY (category_id) REFERENCES categories(id)
+    ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS product_spec_values (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  product_id INT NOT NULL,
+  spec_id INT NOT NULL,
+  value VARCHAR(255) NOT NULL DEFAULT '',
+  CONSTRAINT fk_product_spec_values_product
+    FOREIGN KEY (product_id) REFERENCES products(id)
+    ON DELETE CASCADE,
+  CONSTRAINT fk_product_spec_values_spec
+    FOREIGN KEY (spec_id) REFERENCES category_specs(id)
+    ON DELETE CASCADE,
+  UNIQUE KEY uniq_product_spec (product_id, spec_id)
+);
+
+CREATE TABLE IF NOT EXISTS loss_records (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  reason VARCHAR(255) NOT NULL,
+  loss_amount DECIMAL(10, 2) NOT NULL DEFAULT 0,
+  shipping_loss DECIMAL(10, 2) NOT NULL DEFAULT 0,
+  other_loss DECIMAL(10, 2) NOT NULL DEFAULT 0,
+  note VARCHAR(255) NOT NULL DEFAULT '',
+  loss_date DATE NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS gross_profit_records (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  actual_revenue DECIMAL(10, 2) NOT NULL DEFAULT 0,
+  actual_cost DECIMAL(10, 2) NOT NULL DEFAULT 0,
+  actual_gross_profit DECIMAL(10, 2) NOT NULL DEFAULT 0,
+  gross_profit_rate DECIMAL(10, 2) NOT NULL DEFAULT 0,
+  record_date DATE NOT NULL,
+  note VARCHAR(255) NOT NULL DEFAULT '',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
